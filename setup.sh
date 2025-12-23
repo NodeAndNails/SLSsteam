@@ -25,9 +25,8 @@ uninstall_flatpak()
 		return 1
 	fi
 
-	flatpak override --user --unset-env=DEBUGGER --unset-env=DEBUGGER_ARGS "$FLATPAK_APP_ID" 2> /dev/null
+	flatpak override --user --unset-env=LD_AUDIT --unset-env=SHARED_LIBRARY_GUARD "$FLATPAK_APP_ID" 2> /dev/null
 	rm -v "$FLATPAK_STEAM_DIR/SLSsteam.so" 2> /dev/null
-	rm -v "$FLATPAK_STEAM_DIR/sls_launch.sh" 2> /dev/null
 
 	echo "Flatpak uninstall done!"
 }
@@ -161,13 +160,7 @@ install_flatpak()
 
 	cp -v "$LIB" "$FLATPAK_STEAM_DIR/"
 
-	cat > "$FLATPAK_STEAM_DIR/sls_launch.sh" <<'EOF'
-DIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
-export DEBUGGER="$STEAM_DEBUGGER"
-env -u DEBUGGER -u STEAM_DEBUGGER -u DEBUGGER_ARGS LD_AUDIT="${LD_AUDIT:+$LD_AUDIT:}$DIR/SLSsteam.so" "$@"
-EOF
-
-	flatpak override --user --env=DEBUGGER="." --env=DEBUGGER_ARGS="$FLATPAK_STEAM_DIR/sls_launch.sh" "$FLATPAK_APP_ID"
+	flatpak override --user --env=LD_AUDIT="/app/links/\$LIB/libshared-library-guard.so:$FLATPAK_STEAM_DIR/SLSsteam.so" --env=SHARED_LIBRARY_GUARD=0 "$FLATPAK_APP_ID"
 
 	echo "Flatpak install done!"
 }
