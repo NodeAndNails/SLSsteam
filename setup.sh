@@ -5,8 +5,9 @@ SLSPATH="$SLSDIR/path"
 SLSLIB="$SLSDIR/SLSsteam.so"
 SLSAUDIT="LD_AUDIT=\"$SLSDIR/library-inject.so:$SLSDIR/SLSsteam.so\""
 
-FLATPAK_STEAM_DIR="$HOME/.var/app/com.valvesoftware.Steam"
 FLATPAK_APP_ID="com.valvesoftware.Steam"
+FLATPAK_SLSDIR="$HOME/.var/app/$FLATPAK_APP_ID/.local/share/SLSsteam"
+FLATPAK_SLSLIB="$FLATPAK_SLSDIR/SLSsteam.so"
 
 uninstall()
 {
@@ -26,7 +27,7 @@ uninstall_flatpak()
 	fi
 
 	flatpak override --user --unset-env=LD_AUDIT --unset-env=SHARED_LIBRARY_GUARD "$FLATPAK_APP_ID" 2> /dev/null
-	rm -v "$FLATPAK_STEAM_DIR/SLSsteam.so" 2> /dev/null
+	rm -rvf "$FLATPAK_SLSDIR"
 
 	echo "Flatpak uninstall done!"
 }
@@ -150,17 +151,17 @@ install_flatpak()
 		return 1
 	fi
 
-	if [ ! -d "$FLATPAK_STEAM_DIR" ]; then
-		mkdir -p "$FLATPAK_STEAM_DIR"
+	if [ ! -d "$FLATPAK_SLSDIR" ]; then
+		mkdir -p "$FLATPAK_SLSDIR"
 		if [[ $? -ne 0 ]]; then
-			echo "Unable to create $FLATPAK_STEAM_DIR! Aborting flatpak install"
+			echo "Unable to create $FLATPAK_SLSDIR! Aborting flatpak install"
 			return 1
 		fi
 	fi
 
-	cp -v "$LIB" "$FLATPAK_STEAM_DIR/"
+	cp -v "$LIB" "$FLATPAK_SLSDIR/"
 
-	flatpak override --user --env=LD_AUDIT="/app/links/\$LIB/libshared-library-guard.so:$FLATPAK_STEAM_DIR/SLSsteam.so" --env=SHARED_LIBRARY_GUARD=0 "$FLATPAK_APP_ID"
+	flatpak override --user --env=LD_AUDIT="/app/links/\$LIB/libshared-library-guard.so:$FLATPAK_SLSLIB" --env=SHARED_LIBRARY_GUARD=0 "$FLATPAK_APP_ID"
 
 	echo "Flatpak install done!"
 }
