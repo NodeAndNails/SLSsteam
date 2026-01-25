@@ -178,7 +178,7 @@ static void hkProtoBufMsgBase_New(CProtoBufMsgBase* pMsg, void* pSrc)
 		return;
 	}
 
-	g_pLog->debug("Received ProtoBufMsg of type %u\n", pMsg->type);
+	g_pLog->debug("Received ProtoBufMsg of type %u with type %s\n", pMsg->type, MemHlp::getTypeName(pMsg));
 
 	Achievements::recvMessage(pMsg);
 	Ticket::recvMsg(pMsg);
@@ -189,7 +189,7 @@ static uint32_t hkProtoBufMsgBase_Send(CProtoBufMsgBase* pMsg)
 	Apps::sendMsg(pMsg);
 
 	const uint32_t ret = Hooks::CProtoBufMsgBase_Send.tramp.fn(pMsg);
-	g_pLog->debug("Sending ProtoBufMsg of type %u\n", pMsg->type);
+	g_pLog->debug("Sending ProtoBufMsg of type %u with type %s\n", pMsg->type, MemHlp::getTypeName(pMsg));
 
 	return ret;
 }

@@ -67,6 +67,8 @@ namespace MemHlp
 
 	//TODO: Create hooking wrapper that calls this automatically
 	bool fixPICThunkCall(const char* name, lm_address_t fn, lm_address_t tramp);
+
+	const char* getTypeName(void* pClass);
 	
 	template<typename tFN, typename ...Args>
 	constexpr auto callVFunc(unsigned int index, void* thisPtr, Args... args)

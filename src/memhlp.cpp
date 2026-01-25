@@ -3,6 +3,8 @@
 #include "log.hpp"
 #include "utils.hpp"
 
+#include "libmem/libmem.h"
+
 #include <vector>
 
 std::vector<int16_t> MemHlp::patternToBytes(const char* pattern)
@@ -237,4 +239,14 @@ bool MemHlp::fixPICThunkCall(const char* name, lm_address_t fn, lm_address_t tra
 	}
 
 	return false;
+}
+
+
+const char* MemHlp::getTypeName(void* pClass)
+{
+	const lm_address_t vft = *reinterpret_cast<lm_address_t*>(pClass);
+	const lm_address_t typeInfo = *reinterpret_cast<lm_address_t*>(vft - sizeof(lm_address_t));
+	const char* name = *reinterpret_cast<const char**>(typeInfo + sizeof(lm_address_t));
+
+	return name;
 }
