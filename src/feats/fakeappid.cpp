@@ -2,6 +2,7 @@
 
 #include "../config.hpp"
 
+#include "../sdk/CProtoBufMsgBase.hpp"
 #include "../sdk/CSteamEngine.hpp"
 #include "../sdk/CSteamMatchmakingServers.hpp"
 #include "../sdk/CUser.hpp"
@@ -123,4 +124,33 @@ void FakeAppIds::pingResponse(gameserverdetails_t *details)
 	}
 
 	details->appId = fakeAppIdMapPings[ip];
+}
+
+
+void FakeAppIds::sendMsg(CProtoBufMsgBase* msg)
+{
+	switch(msg->type)
+	{
+		case EMSG_GAMESPLAYED:
+		case EMSG_GAMESPLAYED_NO_DATABLOB:
+		case EMSG_GAMESPLAYED_WITH_DATABLOB:
+			break;
+
+		default:
+			return;
+	}
+
+	const auto body = reinterpret_cast<CMsgClientGamesPlayed*>(msg->body);
+	for(int i = 0; i < body->games_played_size(); i++)
+	{
+		const auto game = body->mutable_games_played(i);
+		const uint32_t fakeAppId = FakeAppIds::getFakeAppId(game->game_id());
+		if (!fakeAppId)
+		{
+			continue;
+		}
+
+		g_pLog->debug("Setting %llu to %u\n", game->game_id(), fakeAppId);
+		game->set_game_id(fakeAppId);
+	}
 }

@@ -187,6 +187,7 @@ static void hkProtoBufMsgBase_New(CProtoBufMsgBase* pMsg, void* pSrc)
 static uint32_t hkProtoBufMsgBase_Send(CProtoBufMsgBase* pMsg)
 {
 	Apps::sendMsg(pMsg);
+	FakeAppIds::sendMsg(pMsg);
 
 	const uint32_t ret = Hooks::CProtoBufMsgBase_Send.tramp.fn(pMsg);
 	g_pLog->debug("Sending ProtoBufMsg of type %u with type %s\n", pMsg->type, MemHlp::getTypeName(pMsg));
