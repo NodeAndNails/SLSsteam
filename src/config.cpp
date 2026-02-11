@@ -20,7 +20,8 @@ std::string CConfig::getDir()
 	if (configDir != NULL)
 	{
 		sprintf(pathBuf, "%s/SLSsteam", configDir);
-	} else
+	}
+	else
 	{
 		const char* home = getenv("HOME");
 		sprintf(pathBuf, "%s/.config/SLSsteam", home);
