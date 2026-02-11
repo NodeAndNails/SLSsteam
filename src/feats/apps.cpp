@@ -63,25 +63,26 @@ bool Apps::checkAppOwnership(uint32_t appId, CAppOwnershipInfo* pInfo)
 		return false;
 	}
 
-	if (!g_config.isAddedAppId(appId) && (!g_config.playNotOwnedGames.get() || pInfo->purchased))
+	const bool manualUnlock = g_config.isAddedAppId(appId);
+	if (!manualUnlock && (!g_config.playNotOwnedGames.get() || pInfo->purchased))
 	{
 		return false;
 	}
 
-	//Returning false after we modify data shouldn't cause any problems because it should just get discarded
-	if (!g_pClientApps)
+	if (!manualUnlock && g_config.automaticFilter.get())
 	{
-		return false;
-	}
+		//Returning false after we modify data shouldn't cause any problems because it should just get discarded
+		if (!g_pClientApps)
+		{
+			return false;
+		}
 
-	auto type = g_pClientApps->getAppType(appId);
-	if (type == APPTYPE_DLC) //Don't touch DLC here, otherwise downloads might break. Hopefully this won't decrease compatibility
-	{
-		return false;
-	}
+		auto type = g_pClientApps->getAppType(appId);
+		if (type == APPTYPE_DLC) //Don't touch DLC here, otherwise downloads might break. Hopefully this won't decrease compatibility
+		{
+			return false;
+		}
 
-	if (g_config.automaticFilter.get())
-	{
 		switch(type)
 		{
 			case APPTYPE_APPLICATION:
