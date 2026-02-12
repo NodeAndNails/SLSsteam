@@ -22,6 +22,7 @@
 #include "feats/achievements.hpp"
 #include "feats/apps.hpp"
 #include "feats/dlc.hpp"
+#include "feats/misc.hpp"
 #include "feats/fakeappid.hpp"
 #include "feats/fakeoffline.hpp"
 #include "feats/ticket.hpp"
@@ -181,6 +182,7 @@ static void hkProtoBufMsgBase_InitFromPacket(CProtoBufMsgBase* pMsg, void* pSrc)
 	g_pLog->debug("Received ProtoBufMsg of type %u with type %s\n", pMsg->type, MemHlp::getTypeName(pMsg));
 
 	Achievements::recvMessage(pMsg);
+	Misc::recvMsg(pMsg);
 	Ticket::recvMsg(pMsg);
 }
 

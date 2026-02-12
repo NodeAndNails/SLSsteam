@@ -3,6 +3,7 @@
 #include "protobufs/steammessages_base.pb.h"
 #include "protobufs/encrypted_app_ticket.pb.h"
 #include "protobufs/steammessages_clientserver.pb.h"
+#include "protobufs/steammessages_clientserver_2.pb.h"
 #include "protobufs/steammessages_clientserver_appinfo.pb.h"
 #include "protobufs/steammessages_clientserver_friends.pb.h"
 #include "protobufs/steammessages_clientserver_userstats.pb.h"
@@ -16,7 +17,9 @@ enum EMsgType : uint16_t
 	EMSG_REQUEST_USERSTATS_RESPONSE = 819,
 	EMSG_APPOWNERSHIPTICKET_RESPONSE = 858,
 	EMSG_ENCRYPTED_APPTICKET_RESPONSE = 5527,
+	EMSG_WALLET_INFO_UPDATE = 5528,
 	EMSG_GAMESPLAYED_WITH_DATABLOB = 5410,
+	EMSG_EMAIL_ADDRESS_INFO = 5456,
 	EMSG_PICS_PRODUCTINFO_REQUEST = 8903,
 	EMSG_PICS_ACCESSTOKEN_RESPONSE = 8906,
 };

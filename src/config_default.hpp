@@ -83,6 +83,12 @@ NotifyInit: yes
 #Enable sending commands to SLSsteam via /tmp/SLSsteam.API
 API: no
 
+#Changes your account's E-Mail clientsided. Leave blank to disable
+FakeEmail: ""
+
+#Changes your wallet's balance clientsidedly. 0 to turn off
+FakeWalletBalance: 0
+
 #Log levels:
 #Once = 0
 #Debug = 1
