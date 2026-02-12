@@ -35,7 +35,7 @@ namespace Patterns
 
 	namespace CProtoBufMsgBase
 	{
-		extern Pattern_t New;
+		extern Pattern_t InitFromPacket;
 		extern Pattern_t Send;
 	};
 

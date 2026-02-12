@@ -74,9 +74,9 @@ namespace Patterns
 
 	namespace CProtoBufMsgBase
 	{
-		Pattern_t New
+		Pattern_t InitFromPacket
 		{
-			"CProtoBufMsgBase::New",
+			"CProtoBufMsgBase::InitFromPacket",
 			"E8 ? ? ? ? 58 8B 45 ? 8B 8D",
 			SigFollowMode::Relative
 		};

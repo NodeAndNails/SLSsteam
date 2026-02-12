@@ -168,9 +168,9 @@ static void hkLogSteamPipeCall(const char* iface, const char* fn)
 	}
 }
 
-static void hkProtoBufMsgBase_New(CProtoBufMsgBase* pMsg, void* pSrc)
+static void hkProtoBufMsgBase_InitFromPacket(CProtoBufMsgBase* pMsg, void* pSrc)
 {
-	Hooks::CProtoBufMsgBase_New.tramp.fn(pMsg, pSrc);
+	Hooks::CProtoBufMsgBase_InitFromPacket.tramp.fn(pMsg, pSrc);
 
 	//Safety first
 	if (!pSrc)
@@ -972,7 +972,7 @@ namespace Hooks
 	DetourHook<IClientUser_PipeLoop_t> IClientUser_PipeLoop;
 	DetourHook<IClientUserStats_PipeLoop_t> IClientUserStats_PipeLoop;
 
-	DetourHook<CProtoBufMsgBase_New_t> CProtoBufMsgBase_New;
+	DetourHook<CProtoBufMsgBase_InitFromPacket_t> CProtoBufMsgBase_InitFromPacket;
 	DetourHook<CProtoBufMsgBase_Send_t> CProtoBufMsgBase_Send;
 
 	DetourHook<CSteamMatchmakingServers_GetServerDetails_t> CSteamMatchmakingServers_GetServerDetails;
@@ -1025,7 +1025,7 @@ bool Hooks::setup()
 	bool succeeded =
 		LogSteamPipeCall.setup(Patterns::LogSteamPipeCall, &hkLogSteamPipeCall)
 
-		&& CProtoBufMsgBase_New.setup(Patterns::CProtoBufMsgBase::New, &hkProtoBufMsgBase_New)
+		&& CProtoBufMsgBase_InitFromPacket.setup(Patterns::CProtoBufMsgBase::InitFromPacket, &hkProtoBufMsgBase_InitFromPacket)
 		&& CProtoBufMsgBase_Send.setup(Patterns::CProtoBufMsgBase::Send, &hkProtoBufMsgBase_Send)
 
 		&& CSteamMatchmakingServers_GetServerDetails.setup(Patterns::CSteamMatchmakingServers::GetServerDetails, &hkSteamMatchmakingServers_GetServerDetails)
@@ -1073,7 +1073,7 @@ void Hooks::place()
 	//Detours
 	LogSteamPipeCall.place();
 
-	CProtoBufMsgBase_New.place();
+	CProtoBufMsgBase_InitFromPacket.place();
 	CProtoBufMsgBase_Send.place();
 
 	CSteamEngine_Init.place();
@@ -1113,7 +1113,7 @@ void Hooks::remove()
 	//Detours
 	LogSteamPipeCall.remove();
 
-	CProtoBufMsgBase_New.remove();
+	CProtoBufMsgBase_InitFromPacket.remove();
 	CProtoBufMsgBase_Send.remove();
 
 	CSteamEngine_Init.remove();

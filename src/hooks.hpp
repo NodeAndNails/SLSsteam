@@ -80,7 +80,7 @@ namespace Hooks
 	typedef void(*IClientUser_PipeLoop_t)(void*, void*, void*, void*);
 	typedef void(*IClientUserStats_PipeLoop_t)(void*, void*, void*, void*);
 
-	typedef void(*CProtoBufMsgBase_New_t)(CProtoBufMsgBase*, void*);
+	typedef void(*CProtoBufMsgBase_InitFromPacket_t)(CProtoBufMsgBase*, void*);
 	typedef uint32_t(*CProtoBufMsgBase_Send_t)(CProtoBufMsgBase*);
 
 	typedef void(*CSteamEngine_Init_t)(void*);
@@ -105,7 +105,7 @@ namespace Hooks
 
 	extern DetourHook<LogSteamPipeCall_t> LogSteamPipeCall;
 
-	extern DetourHook<CProtoBufMsgBase_New_t> CProtoBufMsgBase_New;
+	extern DetourHook<CProtoBufMsgBase_InitFromPacket_t> CProtoBufMsgBase_InitFromPacket;
 	extern DetourHook<CProtoBufMsgBase_Send_t> CProtoBufMsgBase_Send;
 
 	extern DetourHook<CSteamMatchmakingServers_GetServerDetails_t> CSteamMatchmakingServers_GetServerDetails;
