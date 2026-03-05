@@ -1,8 +1,11 @@
 #include "fakeoffline.hpp"
 
+
 #include "../sdk/IClientUtils.hpp"
 
 #include "../config.hpp"
+
+#include "fakeappid.hpp"
 
 
 bool FakeOffline::shouldFakeOffline()
@@ -12,7 +15,7 @@ bool FakeOffline::shouldFakeOffline()
 		return false;
 	}
 	
-	const uint32_t appId = g_pClientUtils->getAppId();
+	const uint32_t appId = FakeAppIds::getRealAppIdForCurrentPipe();
 	if (!appId || !g_config.fakeOffline.get().contains(appId))
 	{
 		return false;
