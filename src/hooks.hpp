@@ -93,6 +93,8 @@ namespace Hooks
 	typedef uint32_t(*CUser_GetSubscribedApps_t)(void*, uint32_t*, uint32_t, uint8_t);
 	typedef bool(*IClientAppManager_BCanRemotePlayTogether_t)(void*, uint32_t);
 
+	//Obsolete since commit 31ae1283302c4d9f482391f12d61d4b497edf8e9
+	//TODO: Remove
 	typedef bool(*IClientUser_BIsSubscribedApp_t)(void*, uint32_t);
 	typedef bool(*IClientUser_BLoggedOn_t)(void*);
 	typedef uint32_t(*IClientUser_BUpdateAppOwnershipTicket_t)(void*, uint32_t, bool);
