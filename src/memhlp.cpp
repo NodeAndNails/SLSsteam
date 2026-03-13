@@ -51,7 +51,7 @@ lm_address_t MemHlp::patternScan(const char* pattern, lm_module_t module)
 		if(seg->prot & LM_PROT_R)
 		{
 			codeSections[seg->base] = seg->base + seg->size;
-			g_pLog->debug("Code section at %p to %p\n", seg->base, seg->base + seg->size);
+			//g_pLog->debug("Code section at %p to %p\n", seg->base, seg->base + seg->size);
 		}
 
 		return LM_TRUE;
