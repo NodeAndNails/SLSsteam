@@ -5,7 +5,6 @@
 
 #include "libmem/libmem.h"
 
-#include <algorithm>
 #include <map>
 #include <vector>
 
@@ -72,15 +71,7 @@ lm_address_t MemHlp::patternScan(const char* pattern, lm_module_t module)
 			continue;
 		}
 
-		const lm_address_t sectionStart = std::max(itm.first, module.base);
-		const lm_address_t sectionEnd = std::min(itm.second, end);
-
-		if (sectionStart >= sectionEnd)
-		{
-			continue;
-		}
-
-		for (lm_address_t cur = sectionStart; cur < sectionEnd; cur++)
+		for (lm_address_t cur = itm.first; cur < itm.second; cur++)
 		{
 			bool found = true;
 
@@ -92,7 +83,7 @@ lm_address_t MemHlp::patternScan(const char* pattern, lm_module_t module)
 				}
 
 				lm_address_t byteAddr = cur + i;
-				if (byteAddr > sectionEnd)
+				if (byteAddr > itm.second)
 				{
 					found = false;
 					break;
