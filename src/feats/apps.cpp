@@ -37,7 +37,7 @@ bool Apps::unlockApp(uint32_t appId, CAppOwnershipInfo* info, uint32_t ownerId)
 	info->autoGrant = false;
 	info->trialTime = 0;
 	info->fromFreeWeekend = false;
-	info->freeLicense = false;
+	info->freeLicense = info->familyShared;
 	info->siteLicense = false;
 
 	//g_pLog->debug("Unlocked %u for %u\n", appId, ownerId);
