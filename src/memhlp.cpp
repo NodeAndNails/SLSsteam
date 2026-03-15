@@ -32,41 +32,32 @@ std::vector<int16_t> MemHlp::patternToBytes(const char* pattern)
 	return bytes;
 }
 
-lm_address_t MemHlp::patternScan(const char* pattern, lm_module_t module)
+lm_address_t MemHlp::patternScan(const char* pattern, lm_module_t targetModule)
 {
 	const auto bytes = patternToBytes(pattern);
 
-	//For some reason these last bytes crash on read access, even if PROT_R is set.
-	//If anyone knows why that could be please let me know <3
-	constexpr lm_address_t excludeTailSize = 0xd8000;
-	const lm_address_t end = module.end - excludeTailSize - bytes.size() - 1;
-
-	//Maybe cache all Segments via LM_EnumSegments and check them for their protection before wantomly reading addresses
-	//Totally unnecessary right now, and might always be
-	
-	static auto codeSections = std::map<lm_address_t, lm_address_t>();
-	codeSections.clear();
-
-	const static auto enumSections = [](lm_segment_t* seg, lm_void_t* arg) -> lm_bool_t
+	auto codeSegments = std::map<lm_address_t, lm_address_t>();
+	const static auto enumSegments = [](lm_segment_t* seg, lm_void_t* arg) -> lm_bool_t
 	{
-		if(seg->prot & LM_PROT_R)
+		auto rSegments = reinterpret_cast<std::map<lm_address_t, lm_address_t>*>(arg);
+		if((seg->prot & LM_PROT_R) && (seg->prot & LM_PROT_X))
 		{
-			codeSections[seg->base] = seg->base + seg->size;
+			(*rSegments)[seg->base] = seg->base + seg->size;
 			//g_pLog->debug("Code section at %p to %p\n", seg->base, seg->base + seg->size);
 		}
 
 		return LM_TRUE;
 	};
 
-	LM_EnumSegments(enumSections, nullptr);
+	LM_EnumSegments(enumSegments, &codeSegments);
 
-	for(const auto& itm : codeSections)
+	for(const auto& itm : codeSegments)
 	{
-		if (module.base > itm.second)
+		if (targetModule.base > itm.second)
 		{
 			continue;
 		}
-		if (module.base + module.size < itm.first)
+		if (targetModule.base + targetModule.size < itm.first)
 		{
 			continue;
 		}
