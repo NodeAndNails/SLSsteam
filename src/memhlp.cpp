@@ -40,7 +40,7 @@ lm_address_t MemHlp::patternScan(const char* pattern, lm_module_t targetModule)
 	const static auto enumSegments = [](lm_segment_t* seg, lm_void_t* arg) -> lm_bool_t
 	{
 		auto rSegments = reinterpret_cast<std::map<lm_address_t, lm_address_t>*>(arg);
-		if((seg->prot & LM_PROT_R) && (seg->prot & LM_PROT_X))
+		if(seg->prot & LM_PROT_XR)
 		{
 			(*rSegments)[seg->base] = seg->base + seg->size;
 			//g_pLog->debug("Code section at %p to %p\n", seg->base, seg->base + seg->size);
