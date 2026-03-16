@@ -40,8 +40,7 @@ bool Apps::unlockApp(uint32_t appId, CAppOwnershipInfo* info, uint32_t ownerId)
 	info->freeLicense = info->familyShared;
 	info->siteLicense = false;
 
-	//g_pLog->debug("Unlocked %u for %u\n", appId, ownerId);
-	g_pLog->debug("Unlocked %u\n", appId);
+	g_pLog->once("Unlocked %u\n", appId);
 	return true;
 }
 
@@ -72,6 +71,15 @@ bool Apps::checkAppOwnership(uint32_t appId, CAppOwnershipInfo* pInfo)
 	if (g_config.shouldExcludeAppId(appId))
 	{
 		return false;
+	}
+
+	if (pInfo->lowViolence)
+	{
+		g_pLog->once("Decensoring %u\n", appId);
+	}
+	if (pInfo->regionRestricted)
+	{
+		g_pLog->once("Bypassing region restriction for %u\n", appId);
 	}
 
 	pInfo->lowViolence = false;

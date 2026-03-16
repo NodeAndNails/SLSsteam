@@ -14,8 +14,8 @@
 
 enum class LogLevel : unsigned int
 {
+	//TODO: Add Trace without breaking configs and without using -1 for Once
 	Once,
-	Trace,
 	Debug,
 	Info,
 	NotifyShort,
