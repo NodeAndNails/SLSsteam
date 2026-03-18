@@ -75,15 +75,14 @@ bool Apps::checkAppOwnership(uint32_t appId, CAppOwnershipInfo* pInfo)
 
 	if (pInfo->lowViolence)
 	{
+		pInfo->lowViolence = false;
 		g_pLog->once("Decensoring %u\n", appId);
 	}
 	if (pInfo->regionRestricted)
 	{
+		pInfo->regionRestricted = false;
 		g_pLog->once("Bypassing region restriction for %u\n", appId);
 	}
-
-	pInfo->lowViolence = false;
-	pInfo->regionRestricted = false;
 
 	const bool manualUnlock = g_config.isAddedAppId(appId);
 	if (!manualUnlock && (!g_config.playNotOwnedGames.get() || pInfo->playable))
