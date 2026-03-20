@@ -80,16 +80,21 @@ namespace TicketGrabber
             File.WriteAllText(guardDataFile, guardData);
         }
 
-        protected void storeTicket(string prefix, byte[] ticket)
+        protected void storeTicket(string prefix, byte[] ticket, uint appId = 0)
         {
             if (!Directory.Exists(TicketDir))
             {
                 Directory.CreateDirectory(TicketDir);
             }
 
+            if (appId == 0)
+            {
+                appId = TargetAppId;
+            }
+
             var b64Ticket = System.Convert.ToBase64String(ticket);
 
-            var filePath = Path.Combine(TicketDir, $"{prefix}_{TargetAppId}.yaml");
+            var filePath = Path.Combine(TicketDir, $"{prefix}_{appId}.yaml");
             File.WriteAllLines(filePath,
             [
                 $"steamId: {User.SteamID.AccountID}",
@@ -139,6 +144,7 @@ namespace TicketGrabber
             callbackManager.Subscribe<SteamUser.LoggedOnCallback>(OnLoggedOn);
             callbackManager.Subscribe<SteamUser.LoggedOffCallback>(OnLoggedOff);
             callbackManager.Subscribe<SteamUser.AccountInfoCallback>(OnAccountInfo);
+            callbackManager.Subscribe<SteamApps.LicenseListCallback>(OnLicenseList);
         }
 
         async protected void OnConnected(SteamClient.ConnectedCallback cb)
@@ -196,7 +202,65 @@ namespace TicketGrabber
             Console.WriteLine("Account Info received! Going online...");
 
             Friends.SetPersonaState(EPersonaState.Online);
-            RequestTickets(TargetAppId);
+
+            if (TargetAppId > 0)
+            {
+                RequestTickets(TargetAppId);
+                return;
+            }
+        }
+
+        protected async void OnLicenseList(SteamApps.LicenseListCallback cb)
+        {
+            if (TargetAppId != 0)
+            {
+                return;
+            }
+
+            foreach (var lic in cb.LicenseList.OrderBy(l => l.PackageID))
+            {
+                Console.WriteLine($"Processing license {lic.PackageID}");
+
+                var info = await Apps.PICSGetProductInfo(null, new SteamApps.PICSRequest(lic.PackageID));
+                if (info == null || info.Results == null)
+                {
+                    Console.WriteLine($"Failed to get PICS info for {lic.PackageID}");
+                    continue;
+                }
+
+                Console.WriteLine("PICS Info received!");
+
+                foreach (var res in info.Results)
+                {
+                    foreach (var package in res.Packages)
+                    {
+                        var kv = package.Value.KeyValues;
+                        var id = kv["packageid"];
+                        var apps = kv["appids"];
+
+                        foreach (var app in apps.Children)
+                        {
+                            var appId = app.AsUnsignedInteger();
+                            var path = Path.Join(TicketDir, $"ticket_{appId}.yaml");
+                            if (File.Exists(path))
+                            {
+                                continue;
+                            }
+
+                            Console.WriteLine($"Requesting ticket for {appId}");
+
+                            var ticket = await Apps.GetAppOwnershipTicket(appId);
+                            if (ticket.Result != EResult.OK)
+                            {
+                                Console.WriteLine($"Failed to get ticket {ticket.Result}!");
+                                continue;
+                            }
+
+                            storeTicket("ticket", ticket.Ticket, appId);
+                        }
+                    }
+                }
+            }
         }
 
         public void SendGamesPlayed(ulong appId)
