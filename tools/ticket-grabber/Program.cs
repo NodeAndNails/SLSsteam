@@ -230,7 +230,7 @@ namespace TicketGrabber
             Console.WriteLine("PICS Info received!");
 
             var packages = info.Results.SelectMany(i => i.Packages);
-            var apps = packages.SelectMany(p => p.Value.KeyValues["appids"].Children.Select(c => c.AsUnsignedInteger()));
+            var apps = packages.SelectMany(p => p.Value.KeyValues["appids"].Children.Select(c => c.AsUnsignedInteger())).Distinct();
 
             var needed = apps.Where(a =>
             {
