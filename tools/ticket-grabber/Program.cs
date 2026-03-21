@@ -217,50 +217,71 @@ namespace TicketGrabber
                 return;
             }
 
-            foreach (var lic in cb.LicenseList.OrderBy(l => l.PackageID))
+            Console.WriteLine("Licenses received!");
+
+            var info = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest[] { }, cb.LicenseList.Select(l => new SteamApps.PICSRequest(l.PackageID)));
+            if (info == null || info.Results == null)
             {
-                Console.WriteLine($"Processing license {lic.PackageID}");
-
-                var info = await Apps.PICSGetProductInfo(null, new SteamApps.PICSRequest(lic.PackageID));
-                if (info == null || info.Results == null)
-                {
-                    Console.WriteLine($"Failed to get PICS info for {lic.PackageID}");
-                    continue;
-                }
-
-                Console.WriteLine("PICS Info received!");
-
-                foreach (var res in info.Results)
-                {
-                    foreach (var package in res.Packages)
-                    {
-                        var kv = package.Value.KeyValues;
-                        var id = kv["packageid"];
-                        var apps = kv["appids"];
-
-                        foreach (var app in apps.Children)
-                        {
-                            var appId = app.AsUnsignedInteger();
-                            var path = Path.Join(TicketDir, $"ticket_{appId}.yaml");
-                            if (File.Exists(path))
-                            {
-                                continue;
-                            }
-
-                            Console.WriteLine($"Requesting ticket for {appId}");
-
-                            var ticket = await Apps.GetAppOwnershipTicket(appId);
-                            if (ticket.Result != EResult.OK)
-                            {
-                                Console.WriteLine($"Failed to get ticket {ticket.Result}!");
-                                continue;
-                            }
-
-                            storeTicket("ticket", ticket.Ticket, appId);
-                        }
-                    }
-                }
+                Console.WriteLine($"Failed to get PICS info for {info?.Failed}");
+                return;
             }
+
+            Console.WriteLine("PICS Info received!");
+
+            var packages = info.Results.SelectMany(i => i.Packages);
+            var apps = packages.SelectMany(p => p.Value.KeyValues["appids"].Children.Select(c => c.AsUnsignedInteger()));
+
+            var completed = 0;
+
+            await Parallel.ForEachAsync
+            (
+                apps,
+                new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = 4,
+                },
+                async (app, token) =>
+                {
+                    var path = Path.Join(TicketDir, $"ticket_{app}.yaml");
+                    if (File.Exists(path))
+                    {
+                        return;
+                    }
+
+                    Console.WriteLine($"Requesting ticket for {app}");
+
+                    try
+                    {
+                        var req = new ClientMsgProtobuf<CMsgClientGetAppOwnershipTicket>(EMsg.ClientGetAppOwnershipTicket);
+                        req.SourceJobID = Client.GetNextJobID();
+                        req.Body.app_id = app;
+                        Client.Send(req);
+
+                        var job = Apps.GetAppOwnershipTicket(app);
+                        //Be a little more lenient
+                        job.Timeout = TimeSpan.FromSeconds(30);
+
+                        var ticket = await job;
+                        if (ticket.Result != EResult.OK)
+                        {
+                            Console.WriteLine($"Failed to get ticket for {app} -> {ticket.Result}!");
+                            return;
+                        }
+
+                        storeTicket("ticket", ticket.Ticket, app);
+                    }
+                    catch (TaskCanceledException exc)
+                    {
+                        Console.WriteLine($"Failed to get ticket for {app} -> {exc}");
+                    }
+
+                    completed++;
+                    Console.Title = $"Batch mode {completed} of {apps.Count()}";
+                }
+            );
+
+            Console.WriteLine("Finished!");
+            finished = true;
         }
 
         public void SendGamesPlayed(ulong appId)
