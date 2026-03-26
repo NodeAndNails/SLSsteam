@@ -34,6 +34,14 @@ public:
 		//without implementing it ourself anyway
 	};
 
+	enum class ELoadError : uint32_t
+	{
+		None,
+		MissingKey,
+		ParsingException
+	};
+	MTVariable<ELoadError> __loadErrors;
+
 	MTVariable<std::unordered_set<uint32_t>> appIds;
 	MTVariable<std::unordered_set<uint32_t>> addedAppIds;
 	MTVariable<std::unordered_map<uint32_t, CDlcData>> dlcData;
@@ -71,6 +79,7 @@ public:
 	bool createFile();
 	bool init();
 
+	void setError(ELoadError err);
 	bool loadSettings();
 
 	template<typename T>
@@ -78,7 +87,8 @@ public:
 	{
 		if (!node[name])
 		{
-			g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			//g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			setError(ELoadError::MissingKey);
 			return defVal;
 		}
 
@@ -88,7 +98,8 @@ public:
 		}
 		catch (YAML::BadConversion& er)
 		{
-			g_pLog->notify("Failed to parse value of %s! Using default\n", name);
+			//g_pLog->notify("Failed to parse value of %s! Using default\n", name);
+			setError(ELoadError::ParsingException);
 			return defVal;
 		}
 	};
@@ -101,7 +112,8 @@ public:
 		const auto node = rootNode[name];
 		if (!node)
 		{
-			g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			//g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			setError(ELoadError::MissingKey);
 			return list;
 		}
 
@@ -120,7 +132,8 @@ public:
 			}
 			catch(...)
 			{
-				g_pLog->notify("Failed to parse %s!", name);
+				//g_pLog->notify("Failed to parse %s!", name);
+				setError(ELoadError::ParsingException);
 			}
 		}
 
@@ -135,7 +148,8 @@ public:
 		const auto node = rootNode[name];
 		if (!node)
 		{
-			g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			//g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			setError(ELoadError::MissingKey);
 			return map;
 		}
 
@@ -159,7 +173,8 @@ public:
 			}
 			catch(...)
 			{
-				g_pLog->notify("Failed to parse %s!", name);
+				//g_pLog->notify("Failed to parse %s!", name);
+				setError(ELoadError::ParsingException);
 			}
 		}
 

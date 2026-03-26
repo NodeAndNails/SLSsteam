@@ -93,6 +93,17 @@ CConfig::~CConfig()
 	}
 }
 
+
+void CConfig::setError(ELoadError err)
+{
+	if (__loadErrors.get() > err)
+	{
+		return;
+	}
+
+	__loadErrors = err;
+}
+
 bool CConfig::loadSettings()
 {
 	YAML::Node node;
@@ -110,6 +121,8 @@ bool CConfig::loadSettings()
 		g_pLog->notifyLong("Error parsing config.yaml! %s\nUsing defaults", pe.msg.c_str());
 		node = YAML::Node(); //Create empty node and let defaults kick in
 	}
+
+	__loadErrors = ELoadError::None;
 	
 	disableFamilyLock = getSetting<bool>(node, "DisableFamilyShareLock", true);
 	useWhiteList = getSetting<bool>(node, "UseWhitelist", false);
@@ -168,7 +181,8 @@ bool CConfig::loadSettings()
 		}
 		catch(...)
 		{
-			g_pLog->warn("Failed to parse IdleStatus!");
+			//g_pLog->warn("Failed to parse IdleStatus!");A
+			setError(ELoadError::ParsingException);
 		}
 	}
 	const auto unownedStatusNode = node["UnownedStatus"];
@@ -189,7 +203,8 @@ bool CConfig::loadSettings()
 		}
 		catch(...)
 		{
-			g_pLog->warn("Failed to parse UnownedStatus");
+			//g_pLog->warn("Failed to parse UnownedStatus");
+			setError(ELoadError::ParsingException);
 		}
 	}
 
@@ -222,7 +237,8 @@ bool CConfig::loadSettings()
 			}
 			catch(...)
 			{
-				g_pLog->notify("Failed to parse DlcData!");
+				//g_pLog->notify("Failed to parse DlcData!");
+				setError(ELoadError::ParsingException);
 				break;
 			}
 		}
@@ -231,7 +247,8 @@ bool CConfig::loadSettings()
 	}
 	else
 	{
-		g_pLog->notify("Missing DlcData entry in config!");
+		//g_pLog->notify("Missing DlcData entry in config!");
+		setError(ELoadError::MissingKey);
 	}
 
 	const auto denuvoGamesNode = node["DenuvoGames"];
@@ -257,7 +274,8 @@ bool CConfig::loadSettings()
 			}
 			catch (...)
 			{
-				g_pLog->notify("Failed to parse DenuvoGames!");
+				//g_pLog->notify("Failed to parse DenuvoGames!");
+				setError(ELoadError::ParsingException);
 			}
 		}
 
@@ -265,8 +283,23 @@ bool CConfig::loadSettings()
 	}
 	else
 	{
-		g_pLog->notify("Missing DenuvoGames entry in config!");
+		//g_pLog->notify("Missing DenuvoGames entry in config!");
+		setError(ELoadError::MissingKey);
 	}
+
+	switch(__loadErrors.get())
+	{
+		case ELoadError::MissingKey:
+			g_pLog->notify("Issues during config loading encountered! Missing key(s)");
+			break;
+		case ELoadError::ParsingException:
+			g_pLog->notify("Issues during config loading encountered! Parsing error(s)");
+			break;
+
+		default:
+			break;
+	}
+
 
 	return true;
 }
