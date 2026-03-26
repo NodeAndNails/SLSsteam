@@ -157,6 +157,7 @@ public:
 		{
 			try
 			{
+				//TODO: Add error checks for failed parsing since yaml-cpp does not throw
 				auto k = subNode.first.as<T>();
 				auto v = subNode.second.as<T2>();
 
