@@ -10,7 +10,7 @@ struct CAppOwnershipInfo {
     uint32_t trialTime;
     int32_t field5_0x14;
     int32_t field6_0x18;
-    uint32_t field7_0x1c;
+    uint32_t purchaseTime;
     uint32_t realOwner;
     bool playable;
     bool licenseExpired;

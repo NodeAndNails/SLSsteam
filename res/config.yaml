@@ -66,6 +66,9 @@ UnownedStatus:
 #Override game titles. Only works with owned appIds! For injected appIds use either UnownedStatus or combine them with FakeAppIds
 GameTitles:
 
+#Override purchase time stamps
+AppIdTimes:
+
 #Blocks games from unlocking on wrong accounts
 DenuvoGames:
 

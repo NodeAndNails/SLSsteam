@@ -147,6 +147,7 @@ bool CConfig::loadSettings()
 	fakeAppIds = getMap<uint32_t, uint32_t>(node, "FakeAppIds");
 	appTokens = getMap<uint32_t, uint64_t>(node, "AppTokens");
 	gameTitles = getMap<uint32_t, std::string>(node, "GameTitles");
+	appIdTimes = getMap<uint32_t, uint32_t>(node, "AppIdTimes");
 
 	//Do not warn for these (yet?)
 	const auto idleStatusNode = node["IdleStatus"];

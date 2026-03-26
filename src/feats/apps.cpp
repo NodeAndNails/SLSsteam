@@ -84,6 +84,12 @@ bool Apps::checkAppOwnership(uint32_t appId, CAppOwnershipInfo* pInfo)
 		g_pLog->once("Bypassing region restriction for %u\n", appId);
 	}
 
+	const auto times = g_config.appIdTimes.get();
+	if (times.contains(appId))
+	{
+		pInfo->purchaseTime = times.at(appId);
+	}
+
 	const bool manualUnlock = g_config.isAddedAppId(appId);
 	if (!manualUnlock && (!g_config.playNotOwnedGames.get() || pInfo->playable))
 	{
