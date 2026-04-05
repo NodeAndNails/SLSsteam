@@ -51,7 +51,7 @@ public:
 	MTVariable<FakeGame_t> idleStatus;
 	MTVariable<FakeGame_t> unownedStatus;
 	MTVariable<std::unordered_map<uint32_t, std::string>> gameTitles;
-	MTVariable<std::unordered_map<uint32_t, uint32_t>> appIdTimes;
+	MTVariable<std::unordered_map<uint32_t, uint32_t>> subscriptionTimestamps;
 
 	MTVariable<std::unordered_map<uint32_t, std::unordered_set<uint32_t>>> denuvoGames;
 

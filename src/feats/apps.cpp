@@ -84,7 +84,7 @@ bool Apps::checkAppOwnership(uint32_t appId, CAppOwnershipInfo* pInfo)
 		g_pLog->once("Bypassing region restriction for %u\n", appId);
 	}
 
-	const auto times = g_config.appIdTimes.get();
+	const auto times = g_config.subscriptionTimestamps.get();
 	if (times.contains(appId))
 	{
 		pInfo->purchaseTime = times.at(appId);

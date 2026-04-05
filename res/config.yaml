@@ -67,7 +67,7 @@ UnownedStatus:
 GameTitles:
 
 #Override purchase time stamps
-AppIdTimes:
+SubscriptionTimestamps:
 
 #Blocks games from unlocking on wrong accounts
 DenuvoGames:
