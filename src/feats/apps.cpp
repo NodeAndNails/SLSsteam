@@ -10,6 +10,7 @@
 #include "../config.hpp"
 #include "../globals.hpp"
 
+#include "fakeappid.hpp"
 
 bool Apps::applistRequested;
 std::map<uint32_t, int> Apps::appIdOwnerOverride;
@@ -188,7 +189,7 @@ void Apps::sendGamesPlayed(CMsgClientGamesPlayed* msg)
 		{
 			game.set_game_extra_info(titles[game.game_id()]);
 		}
-		else if (!owned)
+		else if (!owned || FakeAppIds::getFakeAppId(game.game_id()))
 		{
 			char name[256] {}; //No clue how long titles can get
 			g_pClientApps->getAppData(game.game_id(), "common/name", name, sizeof(name));
