@@ -188,6 +188,19 @@ void Apps::sendGamesPlayed(CMsgClientGamesPlayed* msg)
 		{
 			game.set_game_extra_info(titles[game.game_id()]);
 		}
+		else if (!owned)
+		{
+			char common[8192] {}; //If this is to small the steamclient won't write into it
+			unsigned int written = g_pClientApps->getAppDataSection(game.game_id(), EAppInfoSection::APPINFOSECTION_COMMON, common, sizeof(common));
+
+			if (written < sizeof(common))
+			{
+				char name[256]; //No clue how long titles can get
+				strcpy(name, common + 0xA); //Title starts at 0xA
+
+				game.set_game_extra_info(name);
+			}
+		}
 
 		msg->mutable_games_played(i)->ParseFromString(game.SerializeAsString());
 
