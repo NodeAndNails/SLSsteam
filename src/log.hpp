@@ -110,6 +110,11 @@ class CLog
 		}
 
 		ofstream << "[" << logLvlToStr(lvl) << "] " << formatted.c_str();
+		if (lvl == LogLevel::NotifyShort || lvl == LogLevel::NotifyLong)
+		{
+			ofstream << "\n";
+		}
+
 		ofstream.flush();
 	}
 
