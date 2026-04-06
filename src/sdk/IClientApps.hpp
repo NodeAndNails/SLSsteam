@@ -54,6 +54,7 @@ enum EAppInfoSection
 class IClientApps
 {
 public:
+	int32_t getAppData(uint32_t appId, const char* name, const char* pChOut, uint32_t outSize);
 	uint32_t getAppDataSection(uint32_t appId, EAppInfoSection section, const char* pChOut, uint32_t outSize);
 	EAppType getAppType(uint32_t appId);
 };

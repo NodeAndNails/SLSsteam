@@ -5,6 +5,18 @@
 
 #include <cstdint>
 
+int32_t IClientApps::getAppData(uint32_t appId, const char* name, const char* pChOut, uint32_t outSize)
+{
+	return MemHlp::callVFunc<uint32_t(*)(void*, uint32_t, const char*, const char*, uint32_t)>
+	(
+		 VFTIndexes::IClientApps::GetAppData,
+		 this,
+		 appId,
+		 name,
+		 pChOut,
+		 outSize
+	);
+}
 
 uint32_t IClientApps::getAppDataSection(uint32_t appId, EAppInfoSection section, const char* pChOut, uint32_t outSize)
 {
