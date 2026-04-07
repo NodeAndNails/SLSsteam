@@ -69,7 +69,7 @@ install_desktop_file()
 	fi
 
 	if [ ! -d "$USR_APP_DIR" ]; then
-		mkdir "$$USR_APP_DIR"
+		mkdir "$USR_APP_DIR"
 		if [[ $? -ne 0 ]]; then
 			echo "Failed to create $USR_APP_DIR! Aborting .desktop creation"
 			return 1
