@@ -1,13 +1,21 @@
 #pragma once
 
+#include "EResult.hpp"
+
 #include <cstdint>
 
 class CAppOwnershipInfo;
 
-
 enum class ECallbackType : uint32_t
 {
-	LicensesUpdate_t = 0x7d
+	LicensesUpdate_t = 0x7d,
+	AppOwnershipTicketReceived_t = 0xf907c,
+};
+
+struct AppOwnershipTicketReceived_t
+{
+	EResult result;
+	uint32_t appId;
 };
 
 class CUser

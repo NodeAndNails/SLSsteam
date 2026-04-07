@@ -1,6 +1,7 @@
 #include "CUser.hpp"
 
 #include "CAppOwnershipInfo.hpp"
+#include "EResult.hpp"
 
 #include "../hooks.hpp"
 #include "../patterns.hpp"
@@ -32,4 +33,10 @@ void CUser::updateAppOwnershipTicket(uint32_t appId, void* pTicket, uint32_t len
 {
 	const static auto fn = reinterpret_cast<void(*)(void*, uint32_t, void*, uint32_t)>(Patterns::CUser::UpdateAppOwnershipTicket.address);
 	fn(this, appId, pTicket, len);
+
+	//Dunno if this achieves anything, but the client does it so we do too
+	AppOwnershipTicketReceived_t cb;
+	cb.result = ERESULT_OK;
+	cb.appId = appId;
+	postCallback(ECallbackType::AppOwnershipTicketReceived_t, &cb, sizeof(cb));
 }
