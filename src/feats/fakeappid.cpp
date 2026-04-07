@@ -64,7 +64,7 @@ void FakeAppIds::setAppIdForCurrentPipe(uint32_t& appId)
 	}
 }
 
-void FakeAppIds::pipeLoop(bool post)
+void FakeAppIds::runIPCFrame(bool post)
 {
 	uint32_t appId = getRealAppIdForCurrentPipe(false);
 	uint32_t fakeAppId = getFakeAppId(appId);

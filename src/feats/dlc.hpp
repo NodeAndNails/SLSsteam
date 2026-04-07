@@ -12,7 +12,6 @@ namespace DLC
 
 	bool checkAppOwnership(uint32_t appId, CAppOwnershipInfo* info);
 	bool isDlcEnabled(uint32_t appId);
-	bool isSubscribed(uint32_t appId);
 	bool isAppDlcInstalled(uint32_t appId);
 	bool userSubscribedInTicket(uint32_t appId);
 

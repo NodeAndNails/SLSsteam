@@ -19,7 +19,7 @@ namespace FakeAppIds
 
 	//General functionality
 	void setAppIdForCurrentPipe(uint32_t& appId);
-	void pipeLoop(bool post);
+	void runIPCFrame(bool post);
 
 	//Serverbrowser
 	void getServerDetails(uint32_t handle, gameserverdetails_t& details);
