@@ -34,6 +34,14 @@ public:
 		//without implementing it ourself anyway
 	};
 
+	enum class ELoadError : uint32_t
+	{
+		None,
+		MissingKey,
+		ParsingException
+	};
+	MTVariable<ELoadError> __loadErrors;
+
 	MTVariable<std::unordered_set<uint32_t>> appIds;
 	MTVariable<std::unordered_set<uint32_t>> addedAppIds;
 	MTVariable<std::unordered_map<uint32_t, CDlcData>> dlcData;
@@ -43,6 +51,7 @@ public:
 	MTVariable<FakeGame_t> idleStatus;
 	MTVariable<FakeGame_t> unownedStatus;
 	MTVariable<std::unordered_map<uint32_t, std::string>> gameTitles;
+	MTVariable<std::unordered_map<uint32_t, uint32_t>> subscriptionTimestamps;
 
 	MTVariable<std::unordered_map<uint32_t, std::unordered_set<uint32_t>>> denuvoGames;
 
@@ -70,6 +79,7 @@ public:
 	bool createFile();
 	bool init();
 
+	void setError(ELoadError err);
 	bool loadSettings();
 
 	template<typename T>
@@ -77,7 +87,8 @@ public:
 	{
 		if (!node[name])
 		{
-			g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			//g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			setError(ELoadError::MissingKey);
 			return defVal;
 		}
 
@@ -87,7 +98,8 @@ public:
 		}
 		catch (YAML::BadConversion& er)
 		{
-			g_pLog->notify("Failed to parse value of %s! Using default\n", name);
+			//g_pLog->notify("Failed to parse value of %s! Using default\n", name);
+			setError(ELoadError::ParsingException);
 			return defVal;
 		}
 	};
@@ -100,7 +112,8 @@ public:
 		const auto node = rootNode[name];
 		if (!node)
 		{
-			g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			//g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			setError(ELoadError::MissingKey);
 			return list;
 		}
 
@@ -119,7 +132,8 @@ public:
 			}
 			catch(...)
 			{
-				g_pLog->notify("Failed to parse %s!", name);
+				//g_pLog->notify("Failed to parse %s!", name);
+				setError(ELoadError::ParsingException);
 			}
 		}
 
@@ -134,7 +148,8 @@ public:
 		const auto node = rootNode[name];
 		if (!node)
 		{
-			g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			//g_pLog->notifyLong("Missing %s in configfile! Using default", name);
+			setError(ELoadError::MissingKey);
 			return map;
 		}
 
@@ -142,6 +157,7 @@ public:
 		{
 			try
 			{
+				//TODO: Add error checks for failed parsing since yaml-cpp does not throw
 				auto k = subNode.first.as<T>();
 				auto v = subNode.second.as<T2>();
 
@@ -149,16 +165,17 @@ public:
 
 				if (std::is_same_v<T, uint32_t> && std::is_same_v<T, T2>)
 				{
-					g_pLog->debug("Added %u to %u in %s\n", k, v, name);
+					g_pLog->info("Added %u to %u in %s\n", k, v, name);
 				}
 				else if (std::is_same_v<T, uint32_t> && std::is_same_v<T2, uint64_t>)
 				{
-					g_pLog->debug("Added %u to %llu in %s\n", k, v, name);
+					g_pLog->info("Added %u to %llu in %s\n", k, v, name);
 				}
 			}
 			catch(...)
 			{
-				g_pLog->notify("Failed to parse %s!", name);
+				//g_pLog->notify("Failed to parse %s!", name);
+				setError(ELoadError::ParsingException);
 			}
 		}
 

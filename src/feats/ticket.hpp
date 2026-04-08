@@ -21,8 +21,6 @@ public:
 	extern std::map<uint32_t, SavedTicket> ticketMap;
 	extern std::map<uint32_t, SavedTicket> encryptedTicketMap;
 
-	//TODO: Merge reading & saving for both ticket types into 1 function
-
 	std::string getTicketDir();
 
 	//TODO: Fill with error checks

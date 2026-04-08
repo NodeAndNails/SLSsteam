@@ -9,6 +9,8 @@ namespace VFTIndexes
 
 	namespace IClientApps
 	{
+		constexpr int GetAppData = 0;
+		constexpr int GetAppDataSection = 5;
 		constexpr int RequestAppInfoUpdate = 7;
 		constexpr int GetDLCCount = 8;
 		constexpr int GetDLCDataByIndex = 9;

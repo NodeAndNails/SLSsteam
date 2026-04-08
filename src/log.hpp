@@ -6,12 +6,15 @@
 #include <cstring>
 #include <fstream>
 #include <memory>
+#include <mutex>
 #include <openssl/sha.h>
+#include <shared_mutex>
 #include <sstream>
 #include <unordered_set>
 
 enum class LogLevel : unsigned int
 {
+	//TODO: Add Trace without breaking configs and without using -1 for Once
 	Once,
 	Debug,
 	Info,
@@ -24,6 +27,8 @@ enum class LogLevel : unsigned int
 class CLog
 {
 	std::ofstream ofstream;
+	std::unordered_set<std::string> msgHist {};
+	std::shared_mutex mutex;
 
 	constexpr const char* logLvlToStr(LogLevel& lvl)
 	{
@@ -57,8 +62,9 @@ class CLog
 		}
 
 		size_t size = snprintf(nullptr, 0, msg, args...) + 1; //Allocate one more byte for zero termination
-		char* formatted = reinterpret_cast<char*>(malloc(size));
-		snprintf(formatted, size, msg, args...);
+		std::string formatted;
+		formatted.resize(size);
+		snprintf(formatted.data(), size, msg, args...);
 
 		std::stringstream notifySS;
 
@@ -66,21 +72,19 @@ class CLog
 		{
 			//TODO: Fix possible breakage when there's only one " in formatted
 			case LogLevel::NotifyShort:
-				notifySS << "notify-send -t 10000 -u \"normal\" \"SLSsteam\" \"" << formatted << "\"";
+				notifySS << "notify-send -t 10000 -u \"normal\" \"SLSsteam\" \"" << formatted.c_str() << "\"";
 				break;
 			case LogLevel::NotifyLong:
-				notifySS << "notify-send -t 30000 -u \"normal\" \"SLSsteam\" \"" << formatted << "\"";
+				notifySS << "notify-send -t 30000 -u \"normal\" \"SLSsteam\" \"" << formatted.c_str() << "\"";
 				break;
 			case LogLevel::Warn:
-				notifySS << "notify-send -u \"critical\" \"SLSsteam\" \"" << formatted << "\"";
+				notifySS << "notify-send -u \"critical\" \"SLSsteam\" \"" << formatted.c_str() << "\"";
 				break;
 
 			default:
 				break;
 
 		}
-
-		ofstream << "[" << logLvlToStr(lvl) << "] " << formatted;
 
 		if (shouldNotify() && notifySS.str().size() > 0)
 		{
@@ -90,8 +94,28 @@ class CLog
 			debug("system(\"%s\")\n", notifySS.str().c_str());
 		}
 
+		const auto lock = std::unique_lock(mutex);
+
+		if (lvl == LogLevel::Once)
+		{
+			for(const auto& oldMsg : msgHist)
+			{
+				if (oldMsg == formatted)
+				{
+					return;
+				}
+			}
+
+			msgHist.emplace(formatted);
+		}
+
+		ofstream << "[" << logLvlToStr(lvl) << "] " << formatted.c_str();
+		if (lvl == LogLevel::NotifyShort || lvl == LogLevel::NotifyLong)
+		{
+			ofstream << "\n";
+		}
+
 		ofstream.flush();
-		free(formatted);
 	}
 
 public:

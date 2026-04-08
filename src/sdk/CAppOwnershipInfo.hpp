@@ -9,12 +9,13 @@ struct CAppOwnershipInfo {
     int32_t masterSubscriptionAppId;
     uint32_t trialTime;
     int32_t field5_0x14;
-    int32_t field6_0x18;
-    uint32_t field7_0x1c;
+    char region[2];
+    char field7_0x1A[2];
+    uint32_t purchaseTime;
     uint32_t realOwner;
-    bool playable;
+    bool ownsLicense;
     bool licenseExpired;
-    bool permanent;
+    bool field12_0x26;
     bool lowViolence;
     bool freeLicense;
     bool regionRestricted;

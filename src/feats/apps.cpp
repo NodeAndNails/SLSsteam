@@ -10,6 +10,7 @@
 #include "../config.hpp"
 #include "../globals.hpp"
 
+#include "fakeappid.hpp"
 
 bool Apps::applistRequested;
 std::map<uint32_t, int> Apps::appIdOwnerOverride;
@@ -21,15 +22,14 @@ bool Apps::unlockApp(uint32_t appId, CAppOwnershipInfo* info, uint32_t ownerId)
 	info->realOwner = 0;
 	info->familyShared = ownerId != g_currentSteamId;
 
-	info->permanent = !info->familyShared;
-	info->retailLicense = !info->familyShared;
 	info->licensePermanent = !info->familyShared;
+	info->retailLicense = false;
 	info->licenseExpired = false;
 	info->licensePending = false;
 	info->licenseLocked = false;
 
 	info->releaseState = ERELEASESTATE_RELEASED;
-	info->playable = true;
+	info->ownsLicense = true;
 
 	info->lowViolence = false;
 	info->regionRestricted = false;
@@ -37,11 +37,10 @@ bool Apps::unlockApp(uint32_t appId, CAppOwnershipInfo* info, uint32_t ownerId)
 	info->autoGrant = false;
 	info->trialTime = 0;
 	info->fromFreeWeekend = false;
-	info->freeLicense = false;
+	info->freeLicense = info->familyShared;
 	info->siteLicense = false;
 
-	//g_pLog->debug("Unlocked %u for %u\n", appId, ownerId);
-	g_pLog->debug("Unlocked %u\n", appId);
+	g_pLog->once("Unlocked %u\n", appId);
 	return true;
 }
 
@@ -74,11 +73,25 @@ bool Apps::checkAppOwnership(uint32_t appId, CAppOwnershipInfo* pInfo)
 		return false;
 	}
 
-	pInfo->lowViolence = false;
-	pInfo->regionRestricted = false;
+	if (pInfo->lowViolence)
+	{
+		pInfo->lowViolence = false;
+		g_pLog->once("Decensoring %u\n", appId);
+	}
+	if (pInfo->regionRestricted)
+	{
+		pInfo->regionRestricted = false;
+		g_pLog->once("Bypassing region restriction for %u\n", appId);
+	}
+
+	const auto times = g_config.subscriptionTimestamps.get();
+	if (times.contains(appId))
+	{
+		pInfo->purchaseTime = times.at(appId);
+	}
 
 	const bool manualUnlock = g_config.isAddedAppId(appId);
-	if (!manualUnlock && (!g_config.playNotOwnedGames.get() || pInfo->playable))
+	if (!manualUnlock && (!g_config.playNotOwnedGames.get() || pInfo->ownsLicense))
 	{
 		return false;
 	}
@@ -174,6 +187,13 @@ void Apps::sendGamesPlayed(CMsgClientGamesPlayed* msg)
 		if (titles.contains(game.game_id()))
 		{
 			game.set_game_extra_info(titles[game.game_id()]);
+		}
+		else if (!owned || FakeAppIds::getFakeAppId(game.game_id()))
+		{
+			char name[256] {}; //No clue how long titles can get
+			g_pClientApps->getAppData(game.game_id(), "common/name", name, sizeof(name));
+			g_pLog->debug("AppName %s\n", name);
+			game.set_game_extra_info(name);
 		}
 
 		msg->mutable_games_played(i)->ParseFromString(game.SerializeAsString());

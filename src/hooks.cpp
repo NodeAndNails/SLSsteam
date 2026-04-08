@@ -22,7 +22,6 @@
 #include "feats/dlc.hpp"
 #include "feats/misc.hpp"
 #include "feats/fakeappid.hpp"
-#include "feats/fakeoffline.hpp"
 #include "feats/ticket.hpp"
 
 #include "libmem/libmem.h"
@@ -346,6 +345,7 @@ static void* hkClientAppManager_LaunchApp(void* pClientAppManager, uint32_t* pAp
 			a4
 		);
 
+		FakeAppIds::launchApp(*pAppId);
 		Ticket::launchApp(*pAppId);
 	}
 
@@ -553,17 +553,17 @@ static void hkClientRemoteStorage_RunIPCFrame(void* pClientRemoteStorage, void* 
 	}
 	
 	//Cloud & Workshop
-	FakeAppIds::pipeLoop(false);
+	FakeAppIds::runIPCFrame(false);
 	Hooks::IClientRemoteStorage_RunIPCFrame.tramp.fn(pClientRemoteStorage, a1, a2, a3);
-	FakeAppIds::pipeLoop(true);
+	FakeAppIds::runIPCFrame(true);
 }
 
 static void hkClientUGC_RunIPCFrame(void* pClientUGC, void* a1, void* a2, void* a3)
 {
 	//Workshop
-	FakeAppIds::pipeLoop(false);
+	FakeAppIds::runIPCFrame(false);
 	Hooks::IClientUGC_RunIPCFrame.tramp.fn(pClientUGC, a1, a2, a3);
-	FakeAppIds::pipeLoop(true);
+	FakeAppIds::runIPCFrame(true);
 }
 
 static uint32_t hkClientUtils_GetAppId(void* pClientUtils)
@@ -593,7 +593,7 @@ static bool hkClientUtils_GetOfflineMode(void* pClientUtils)
 {
 	const bool ret = Hooks::IClientUtils_GetOfflineMode.originalFn.fn(pClientUtils);
 
-	if (FakeOffline::shouldFakeOffline())
+	if (Misc::shouldFakeOffline())
 	{
 		return true;
 	}
@@ -637,7 +637,7 @@ static bool hkClientUser_BLoggedOn(void* pClientUser)
 	//	ret
 	//);
 	
-	if (FakeOffline::shouldFakeOffline())
+	if (Misc::shouldFakeOffline())
 	{
 		return false;
 	}
@@ -782,9 +782,9 @@ static void hkClientUser_RunIPCFrame(void* pClientUser, void* a1, void* a2, void
 static void hkClientUserStats_RunIPCFrame(void* pClientUserStats, void* a1, void* a2, void* a3)
 {
 	//Achievements
-	FakeAppIds::pipeLoop(false);
+	FakeAppIds::runIPCFrame(false);
 	Hooks::IClientUserStats_RunIPCFrame.tramp.fn(pClientUserStats, a1, a2, a3);
-	FakeAppIds::pipeLoop(true);
+	FakeAppIds::runIPCFrame(true);
 }
 
 static void hkSteamMatchmakingPingResponse_ServerResponded(void* pSteamMatchingPingResponse, gameserverdetails_t* details)

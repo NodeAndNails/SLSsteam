@@ -80,16 +80,21 @@ namespace TicketGrabber
             File.WriteAllText(guardDataFile, guardData);
         }
 
-        protected void storeTicket(string prefix, byte[] ticket)
+        protected void storeTicket(string prefix, byte[] ticket, uint appId = 0)
         {
             if (!Directory.Exists(TicketDir))
             {
                 Directory.CreateDirectory(TicketDir);
             }
 
+            if (appId == 0)
+            {
+                appId = TargetAppId;
+            }
+
             var b64Ticket = System.Convert.ToBase64String(ticket);
 
-            var filePath = Path.Combine(TicketDir, $"{prefix}_{TargetAppId}.yaml");
+            var filePath = Path.Combine(TicketDir, $"{prefix}_{appId}.yaml");
             File.WriteAllLines(filePath,
             [
                 $"steamId: {User.SteamID.AccountID}",
@@ -139,6 +144,7 @@ namespace TicketGrabber
             callbackManager.Subscribe<SteamUser.LoggedOnCallback>(OnLoggedOn);
             callbackManager.Subscribe<SteamUser.LoggedOffCallback>(OnLoggedOff);
             callbackManager.Subscribe<SteamUser.AccountInfoCallback>(OnAccountInfo);
+            callbackManager.Subscribe<SteamApps.LicenseListCallback>(OnLicenseList);
         }
 
         async protected void OnConnected(SteamClient.ConnectedCallback cb)
@@ -196,7 +202,89 @@ namespace TicketGrabber
             Console.WriteLine("Account Info received! Going online...");
 
             Friends.SetPersonaState(EPersonaState.Online);
-            RequestTickets(TargetAppId);
+
+            if (TargetAppId > 0)
+            {
+                RequestTickets(TargetAppId);
+                return;
+            }
+        }
+
+        protected async void OnLicenseList(SteamApps.LicenseListCallback cb)
+        {
+            if (TargetAppId != 0)
+            {
+                return;
+            }
+
+            Console.WriteLine("Licenses received!");
+
+            //TODO: Use apptokens
+            var info = await Apps.PICSGetProductInfo(new SteamApps.PICSRequest[] { }, cb.LicenseList.Select(l => new SteamApps.PICSRequest(l.PackageID)));
+            if (info == null || info.Results == null)
+            {
+                Console.WriteLine($"Failed to get PICS info for {info?.Failed}");
+                return;
+            }
+
+            Console.WriteLine("PICS Info received!");
+
+            var packages = info.Results.SelectMany(i => i.Packages);
+            var apps = packages.SelectMany(p => p.Value.KeyValues["appids"].Children.Select(c => c.AsUnsignedInteger())).Distinct();
+
+            var needed = apps.Where(a =>
+            {
+                var path = Path.Join(TicketDir, $"ticket_{a}.yaml");
+                return !File.Exists(path);
+            }).ToArray();
+
+            var completed = 0;
+            var failed = 0;
+
+            //Do not parallelize, otherwise there are to many timeouts
+            //foreach (var app in needed)
+            await Parallel.ForEachAsync
+            (
+                needed,
+                new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = 3,
+                },
+                async (app, token) =>
+                {
+                    Console.WriteLine($"Requesting ticket for {app}");
+                    Console.Title = $"Batch mode {completed}/{needed.Length}({apps.Count()}) (failed {failed})";
+
+                try_again:
+                    try
+                    {
+                        var job = Apps.GetAppOwnershipTicket(app);
+                        //Be a little more lenient
+                        job.Timeout = TimeSpan.FromSeconds(5);
+
+                        var ticket = await job;
+                        completed++;
+
+                        if (ticket.Result != EResult.OK)
+                        {
+                            Console.WriteLine($"Failed to get ticket for {app} -> {ticket.Result}!");
+                            return;
+                        }
+
+                        storeTicket("ticket", ticket.Ticket, app);
+                    }
+                    catch (TaskCanceledException exc)
+                    {
+                        Console.WriteLine($"Failed to get ticket for {app} -> {exc}");
+                        failed++;
+
+                        goto try_again;
+                    }
+                }
+            );
+
+            Console.WriteLine("Finished!");
+            finished = true;
         }
 
         public void SendGamesPlayed(ulong appId)

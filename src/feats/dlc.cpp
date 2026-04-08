@@ -47,11 +47,6 @@ bool DLC::isDlcEnabled(uint32_t appId)
 	return shouldUnlockDlc(appId);
 }
 
-bool DLC::isSubscribed(uint32_t appId)
-{
-	return shouldUnlockDlc(appId);
-}
-
 bool DLC::isAppDlcInstalled(uint32_t appId)
 {
 	return shouldUnlockDlc(appId);

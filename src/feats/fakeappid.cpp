@@ -8,6 +8,8 @@
 #include "../sdk/CUser.hpp"
 #include "../sdk/IClientUtils.hpp"
 
+uint32_t FakeAppIds::lastAppLaunched;
+
 std::unordered_map<uint32_t, uint32_t> FakeAppIds::fakeAppIdMap = std::unordered_map<uint32_t, uint32_t>();
 std::unordered_map<uint32_t, uint32_t> FakeAppIds::fakeAppIdMapServer = std::unordered_map<uint32_t, uint32_t>();
 std::unordered_map<uint64_t, uint32_t> FakeAppIds::fakeAppIdMapPings = std::unordered_map<uint64_t, uint32_t>();
@@ -44,10 +46,17 @@ uint32_t FakeAppIds::getRealAppIdForCurrentPipe(bool fallback)
 	return 0;
 }
 
+void FakeAppIds::launchApp(uint32_t appId)
+{
+	lastAppLaunched = appId;
+}
+
 void FakeAppIds::setAppIdForCurrentPipe(uint32_t& appId)
 {
 	//Keep track of every AppId, for various reasons
-	fakeAppIdMap[*g_pClientUtils->getPipeIndex()] = appId;
+	//fakeAppIdMap[*g_pClientUtils->getPipeIndex()] = appId;
+	fakeAppIdMap[*g_pClientUtils->getPipeIndex()] = lastAppLaunched;
+
 	g_pLog->debug("fakeAppIdMap[%p] = %u\n", *g_pClientUtils->getPipeIndex(), appId);
 
 	//Do not change Steam Client itself (AppId 0)
@@ -64,7 +73,7 @@ void FakeAppIds::setAppIdForCurrentPipe(uint32_t& appId)
 	}
 }
 
-void FakeAppIds::pipeLoop(bool post)
+void FakeAppIds::runIPCFrame(bool post)
 {
 	uint32_t appId = getRealAppIdForCurrentPipe(false);
 	uint32_t fakeAppId = getFakeAppId(appId);

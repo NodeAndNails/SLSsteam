@@ -1,11 +1,12 @@
 #include <mutex>
+#include <shared_mutex>
 
 
 template<typename T> class MTVariable
 {
 private:
 	T instance;
-	std::mutex mutex;
+	std::shared_mutex mutex;
 
 public:
 	MTVariable() : instance(empty()) { }
@@ -19,14 +20,14 @@ public:
 
 	T get()
 	{
-		auto lock = std::lock_guard<std::mutex>(mutex);
+		const auto lock = std::shared_lock(mutex);
 		//Return copy
 		return T(instance);
 	}
 
 	void set(T value)
 	{
-		auto lock = std::lock_guard<std::mutex>(mutex);
+		const auto lock = std::unique_lock(mutex);
 		instance = value;
 	}
 
