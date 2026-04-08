@@ -10,6 +10,8 @@ struct servernetadr_t;
 
 namespace FakeAppIds
 {
+	extern uint32_t lastAppLaunched;
+
 	extern std::unordered_map<uint32_t, uint32_t> fakeAppIdMap;
 	extern std::unordered_map<uint32_t, uint32_t> fakeAppIdMapServer;
 	extern std::unordered_map<uint64_t, uint32_t> fakeAppIdMapPings;
@@ -18,6 +20,7 @@ namespace FakeAppIds
 	uint32_t getRealAppIdForCurrentPipe(bool fallback = true);
 
 	//General functionality
+	void launchApp(uint32_t appId);
 	void setAppIdForCurrentPipe(uint32_t& appId);
 	void runIPCFrame(bool post);
 

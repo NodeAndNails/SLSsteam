@@ -345,6 +345,7 @@ static void* hkClientAppManager_LaunchApp(void* pClientAppManager, uint32_t* pAp
 			a4
 		);
 
+		FakeAppIds::launchApp(*pAppId);
 		Ticket::launchApp(*pAppId);
 	}
 
