@@ -6,6 +6,7 @@
 1. [Getting started](#getting-started)
 2. [Hall of Fame 👑](#hall-of-fame-aka-credits)
 3. [Hall of Shame 🚨](#hall-of-shame-aka-scammers-leechers-etc)
+4. [Support](#support)
 
 ## Getting started
 
@@ -39,3 +40,8 @@ Please do not seek out Projects listed here!
 If you decide to ignore the aforementioned warning you do so on your own risk!🚨
 
 OnetapBeta by Hammer Steam: Resells Steamless & SLSsteam. Intellectually went far enough to rename SLSsteam to deckloader2, that's about as far as their skill extends.
+
+## Support
+
+Please do not treat the issue tracker like a private support hotline!
+Feel free to join our [Discord](https://discord.gg/j3ZzjeV4eQ) instead.
