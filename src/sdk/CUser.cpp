@@ -20,7 +20,7 @@ bool CUser::isSubscribed(uint32_t appId)
 		return false;
 	}
 
-	return info.playable && !info.licenseExpired;
+	return info.ownsLicense && !info.licenseExpired;
 }
 
 void CUser::postCallback(ECallbackType type, void* pCallback, uint32_t callbackSize)

@@ -22,15 +22,14 @@ bool Apps::unlockApp(uint32_t appId, CAppOwnershipInfo* info, uint32_t ownerId)
 	info->realOwner = 0;
 	info->familyShared = ownerId != g_currentSteamId;
 
-	info->permanent = !info->familyShared;
-	info->retailLicense = !info->familyShared;
 	info->licensePermanent = !info->familyShared;
+	info->retailLicense = false;
 	info->licenseExpired = false;
 	info->licensePending = false;
 	info->licenseLocked = false;
 
 	info->releaseState = ERELEASESTATE_RELEASED;
-	info->playable = true;
+	info->ownsLicense = true;
 
 	info->lowViolence = false;
 	info->regionRestricted = false;
@@ -92,7 +91,7 @@ bool Apps::checkAppOwnership(uint32_t appId, CAppOwnershipInfo* pInfo)
 	}
 
 	const bool manualUnlock = g_config.isAddedAppId(appId);
-	if (!manualUnlock && (!g_config.playNotOwnedGames.get() || pInfo->playable))
+	if (!manualUnlock && (!g_config.playNotOwnedGames.get() || pInfo->ownsLicense))
 	{
 		return false;
 	}
