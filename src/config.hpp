@@ -165,11 +165,11 @@ public:
 
 				if (std::is_same_v<T, uint32_t> && std::is_same_v<T, T2>)
 				{
-					g_pLog->debug("Added %u to %u in %s\n", k, v, name);
+					g_pLog->info("Added %u to %u in %s\n", k, v, name);
 				}
 				else if (std::is_same_v<T, uint32_t> && std::is_same_v<T2, uint64_t>)
 				{
-					g_pLog->debug("Added %u to %llu in %s\n", k, v, name);
+					g_pLog->info("Added %u to %llu in %s\n", k, v, name);
 				}
 			}
 			catch(...)
