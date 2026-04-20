@@ -88,8 +88,6 @@ class CLog
 
 		if (shouldNotify() && notifySS.str().size() > 0)
 		{
-			ofstream << "\n";
-
 			system(notifySS.str().c_str());
 			debug("system(\"%s\")\n", notifySS.str().c_str());
 		}
