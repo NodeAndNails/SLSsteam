@@ -3,7 +3,7 @@
 	url = https://github.com/xamionex/SLScheevo
 [submodule "wiki"]
 	path = wiki
-	url = git@github.com:AceSLS/SLSsteam.wiki.git
+	url = https://github.com/AceSLS/SLSsteam.wiki.git
 [submodule "res/SLSlogos"]
 	path = res/SLSlogos
-	url = git@github.com:xamionex/SLSlogos
+	url = https://github.com/xamionex/SLSlogos
