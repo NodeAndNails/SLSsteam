@@ -185,28 +185,6 @@ bool CConfig::loadSettings()
 			setError(ELoadError::ParsingException);
 		}
 	}
-	const auto unownedStatusNode = node["UnownedStatus"];
-	if (unownedStatusNode)
-	{
-		try
-		{
-			auto appId = unownedStatusNode["AppId"].as<uint32_t>();
-			auto title = unownedStatusNode["Title"].as<std::string>();
-
-			unownedStatus = FakeGame_t
-			{
-				appId,
-				title
-			};
-
-			g_pLog->info("Unowned status %s with AppId %u\n", title.c_str(), appId);
-		}
-		catch(...)
-		{
-			//g_pLog->warn("Failed to parse UnownedStatus");
-			setError(ELoadError::ParsingException);
-		}
-	}
 
 	const auto dlcDataNode = node["DlcData"];
 	if(dlcDataNode)
