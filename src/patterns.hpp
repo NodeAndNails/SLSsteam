@@ -33,6 +33,11 @@ namespace Patterns
 
 	extern Pattern_t TraceIPC;
 
+	namespace CAPIJob
+	{
+		extern Pattern_t GetPlayerStats;
+	}
+
 	namespace CProtoBufMsgBase
 	{
 		extern Pattern_t InitFromPacket;

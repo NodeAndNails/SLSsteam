@@ -72,6 +72,16 @@ namespace Patterns
 		SigFollowMode::Relative
 	};
 
+	namespace CAPIJob
+	{
+		Pattern_t GetPlayerStats
+		{
+			"CAPIJob::GetPlayerStats",
+			"E8 ? ? ? ? 83 C4 10 89 C5 E9 ? ? ? ? C7 86 ? ? ? ? 00 00 00 00",
+			SigFollowMode::Relative
+		};
+	}
+
 	namespace CProtoBufMsgBase
 	{
 		Pattern_t InitFromPacket
